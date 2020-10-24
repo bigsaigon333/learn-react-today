@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import RecipeList from "./RecipeList";
 import { v4 as uuidv4 } from "uuid";
-import "../css/app.css";
+
+import RecipeList from "./RecipeList";
 import RecipeEdit from "./RecipeEdit";
+
+import "../css/app.css";
 
 export const RecipeContext = React.createContext();
 
@@ -27,30 +29,35 @@ function App() {
 	const recipeContextValue = {
 		handleRecipeAdd,
 		handleRecipeDelete,
-		handleRecipeEdit: handleRecipeSelect,
+		handleRecipeSelect,
 		handleRecipeChange,
 	};
 
 	function handleRecipeAdd() {
 		const newRecipe = {
 			id: uuidv4(),
-			name: "New",
-			servings: 1,
-			cookTime: "1:00",
-			instructions: "Instr.",
+			name: "",
+			servings: "",
+			cookTime: "",
+			instructions: "",
 			ingredients: [
 				{
 					id: uuidv4(),
-					name: "Name",
-					amount: "1 Tbs",
+					name: "",
+					amount: "",
 				},
 			],
 		};
 
 		setRecipes([...recipes, newRecipe]);
+		handleRecipeSelect(newRecipe.id);
 	}
 
 	function handleRecipeDelete(id) {
+		if (selectedRecipeId != null && selectedRecipeId === id) {
+			setSelectedRecipeId(undefined);
+		}
+
 		setRecipes(recipes.filter((recipe) => recipe.id !== id));
 	}
 
@@ -58,16 +65,18 @@ function App() {
 		setSelectedRecipeId(id);
 	}
 
-	function handleRecipeChange(id) {}
+	function handleRecipeChange(id, recipe) {
+		const newRecipes = [...recipes];
+		const index = newRecipes.findIndex((r) => r.id === id);
+		newRecipes[index] = recipe;
+		setRecipes(newRecipes);
+	}
 
 	return (
 		<RecipeContext.Provider value={recipeContextValue}>
 			<RecipeList recipes={recipes} />
 			{selectedRecipeId && (
-				<RecipeEdit
-					key={selectedRecipeId}
-					{...recipes.find((recipe) => recipe.id === selectedRecipeId)}
-				/>
+				<RecipeEdit key={selectedRecipeId} recipe={selectedRecipe} />
 			)}
 		</RecipeContext.Provider>
 	);
